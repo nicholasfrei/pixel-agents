@@ -8,3 +8,5 @@ node_modules
 /logs
 /sprites-export
 .env
+.DS_Store
+*.env
