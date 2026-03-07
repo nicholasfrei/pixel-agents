@@ -100,17 +100,17 @@ export function SettingsModal({
         {/* Menu items */}
         <button
           onClick={() => {
-            vscode.postMessage({ type: 'openSessionsFolder' });
+            vscode.postMessage({ type: 'openTranscriptsFolder' });
             onClose();
           }}
-          onMouseEnter={() => setHovered('sessions')}
+          onMouseEnter={() => setHovered('transcripts')}
           onMouseLeave={() => setHovered(null)}
           style={{
             ...menuItemBase,
-            background: hovered === 'sessions' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+            background: hovered === 'transcripts' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
           }}
         >
-          Open Sessions Folder
+          Open Transcripts Folder
         </button>
         <button
           onClick={() => {

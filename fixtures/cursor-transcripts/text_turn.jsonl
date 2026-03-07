@@ -1,0 +1,3 @@
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\nhow often does the status poll?\n</user_query>"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Checking exact intervals for transcript polling."}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Transcript file read runs every 1s (FILE_WATCHER_POLL_INTERVAL_MS). Status changes when the parser sees new lines or turn-end signals."}]}}

@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Breaking Changes
+
+- **Cursor runtime migration** — Replaced legacy launch and transcript assumptions with Cursor defaults (`openAgent`, `openTranscriptsFolder`, transcript path rooted at `~/.cursor/projects/<hash>/agent-transcripts`).
+
+### Features
+
+- **Structured tool protocol** — Extension now emits `toolName`/`toolClass` metadata in tool start events, reducing webview reliance on status-string parsing.
+- **Cursor runtime settings** — Added `pixel-agents.cursorLaunchCommand`, `pixel-agents.cursorTranscriptsRootDir`, and `pixel-agents.cursorTranscriptsSubdir`.
+
 ## v1.0.2
 
 ### Bug Fixes
@@ -8,7 +19,7 @@
 
 ### Features
 
-- **Workspace folder picker for multi-root workspaces** ([#12](https://github.com/pablodelucca/pixel-agents/pull/12)) — Clicking "+ Agent" in a multi-root workspace now shows a picker to choose which folder to open Claude Code in.
+- **Workspace folder picker for multi-root workspaces** ([#12](https://github.com/pablodelucca/pixel-agents/pull/12)) — Clicking "+ Agent" in a multi-root workspace now shows a picker to choose which folder to open the Cursor agent in.
 
 ### Maintenance
 

@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 
-import { COMMAND_EXPORT_DEFAULT_LAYOUT, COMMAND_SHOW_PANEL, VIEW_ID } from './constants.js';
+import {
+  COMMAND_EXPORT_DEFAULT_LAYOUT,
+  COMMAND_OPEN_TAB,
+  COMMAND_SHOW_PANEL,
+  VIEW_ID,
+} from './constants.js';
 import { PixelAgentsViewProvider } from './PixelAgentsViewProvider.js';
 
 let providerInstance: PixelAgentsViewProvider | undefined;
@@ -14,6 +19,12 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMAND_SHOW_PANEL, () => {
       vscode.commands.executeCommand(`${VIEW_ID}.focus`);
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(COMMAND_OPEN_TAB, () => {
+      provider.openInEditorTab();
     }),
   );
 

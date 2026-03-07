@@ -9,6 +9,7 @@ sprites-export/**
 logs/**
 .github/**
 .claude/**
+.cursor/**
 .env
 .gitignore
 esbuild.js

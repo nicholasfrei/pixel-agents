@@ -1,6 +1,6 @@
 import type * as vscode from 'vscode';
 
-import { PERMISSION_TIMER_DELAY_MS } from './constants.js';
+import { PERMISSION_TIMER_DELAY_MS, WAITING_TO_IDLE_DELAY_MS } from './constants.js';
 import type { AgentState } from './types.js';
 
 export function clearAgentActivity(
@@ -25,12 +25,43 @@ export function clearAgentActivity(
 export function cancelWaitingTimer(
   agentId: number,
   waitingTimers: Map<number, ReturnType<typeof setTimeout>>,
+  waitingToIdleTimers?: Map<number, ReturnType<typeof setTimeout>>,
 ): void {
   const timer = waitingTimers.get(agentId);
   if (timer) {
     clearTimeout(timer);
     waitingTimers.delete(agentId);
   }
+  cancelWaitingToIdleTimer(agentId, waitingToIdleTimers);
+}
+
+export function cancelWaitingToIdleTimer(
+  agentId: number,
+  waitingToIdleTimers: Map<number, ReturnType<typeof setTimeout>> | undefined,
+): void {
+  if (!waitingToIdleTimers) return;
+  const timer = waitingToIdleTimers.get(agentId);
+  if (timer) {
+    clearTimeout(timer);
+    waitingToIdleTimers.delete(agentId);
+  }
+}
+
+/** Start only the "waiting → idle" timer (e.g. when we transition to waiting via turn_end). */
+export function startWaitingToIdleTimer(
+  agentId: number,
+  agents: Map<number, AgentState>,
+  waitingToIdleTimers: Map<number, ReturnType<typeof setTimeout>>,
+  webview: vscode.Webview | undefined,
+): void {
+  cancelWaitingToIdleTimer(agentId, waitingToIdleTimers);
+  const timer = setTimeout(() => {
+    waitingToIdleTimers.delete(agentId);
+    const agent = agents.get(agentId);
+    if (agent) agent.isWaiting = false;
+    webview?.postMessage({ type: 'agentStatus', id: agentId, status: 'idle' });
+  }, WAITING_TO_IDLE_DELAY_MS);
+  waitingToIdleTimers.set(agentId, timer);
 }
 
 export function startWaitingTimer(
@@ -39,8 +70,9 @@ export function startWaitingTimer(
   agents: Map<number, AgentState>,
   waitingTimers: Map<number, ReturnType<typeof setTimeout>>,
   webview: vscode.Webview | undefined,
+  waitingToIdleTimers?: Map<number, ReturnType<typeof setTimeout>>,
 ): void {
-  cancelWaitingTimer(agentId, waitingTimers);
+  cancelWaitingTimer(agentId, waitingTimers, waitingToIdleTimers);
   const timer = setTimeout(() => {
     waitingTimers.delete(agentId);
     const agent = agents.get(agentId);
@@ -52,6 +84,16 @@ export function startWaitingTimer(
       id: agentId,
       status: 'waiting',
     });
+    // After 15 minutes in "waiting for input", return character to idle (clear bubble)
+    if (waitingToIdleTimers) {
+      const idleTimer = setTimeout(() => {
+        waitingToIdleTimers.delete(agentId);
+        const a = agents.get(agentId);
+        if (a) a.isWaiting = false;
+        webview?.postMessage({ type: 'agentStatus', id: agentId, status: 'idle' });
+      }, WAITING_TO_IDLE_DELAY_MS);
+      waitingToIdleTimers.set(agentId, idleTimer);
+    }
   }, delayMs);
   waitingTimers.set(agentId, timer);
 }

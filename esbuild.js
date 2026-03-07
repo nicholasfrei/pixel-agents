@@ -6,23 +6,46 @@ const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
 
 /**
- * Copy assets folder to dist/assets
+ * Copy one directory's contents into dist/assets
+ */
+function copyAssetDirectoryContents(srcDir, dstDir) {
+  if (!fs.existsSync(srcDir)) {
+    return false;
+  }
+
+  fs.mkdirSync(dstDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const dstPath = path.join(dstDir, entry.name);
+    fs.cpSync(srcPath, dstPath, { recursive: true });
+  }
+
+  return true;
+}
+
+/**
+ * Copy bundled webview assets plus repo-root imported assets to dist/assets
  */
 function copyAssets() {
-  const srcDir = path.join(__dirname, 'webview-ui', 'public', 'assets');
+  const webviewAssetsDir = path.join(__dirname, 'webview-ui', 'public', 'assets');
+  const repoAssetsDir = path.join(__dirname, 'assets');
   const dstDir = path.join(__dirname, 'dist', 'assets');
 
-  if (fs.existsSync(srcDir)) {
-    // Remove existing dist/assets if present
-    if (fs.existsSync(dstDir)) {
-      fs.rmSync(dstDir, { recursive: true });
-    }
+  if (fs.existsSync(dstDir)) {
+    fs.rmSync(dstDir, { recursive: true });
+  }
 
-    // Copy recursively
-    fs.cpSync(srcDir, dstDir, { recursive: true });
-    console.log('✓ Copied assets/ → dist/assets/');
+  const copiedWebviewAssets = copyAssetDirectoryContents(webviewAssetsDir, dstDir);
+  const copiedRepoAssets = copyAssetDirectoryContents(repoAssetsDir, dstDir);
+
+  if (copiedWebviewAssets || copiedRepoAssets) {
+    console.log('✓ Copied bundled assets to dist/assets/');
+    if (copiedRepoAssets) {
+      console.log('✓ Included repo-root assets/ in dist/assets/');
+    }
   } else {
-    console.log('ℹ️  assets/ folder not found (optional)');
+    console.log('ℹ️  No assets folder found (optional)');
   }
 }
 

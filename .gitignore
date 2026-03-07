@@ -4,6 +4,7 @@ node_modules
 .vscode-test/
 *.vsix
 .claude/
+.cursor/
 /logs
 /sprites-export
 .env

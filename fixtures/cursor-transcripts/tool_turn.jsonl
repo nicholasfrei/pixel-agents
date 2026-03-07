@@ -1,0 +1,3 @@
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\nRead the first 10 lines of README.md\n</user_query>"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Reading README.md."}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Here are the first 10 lines of README.md:\n\n# Pixel Agents\n\nA VS Code extension..."}]}}

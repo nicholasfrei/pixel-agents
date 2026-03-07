@@ -11,7 +11,8 @@ export const STATUS_TO_TOOL: Record<string, string> = {
   Task: 'Task',
 };
 
-export function extractToolName(status: string): string | null {
+export function extractToolName(status: string, explicitToolName?: string | null): string | null {
+  if (explicitToolName) return explicitToolName;
   for (const [prefix, tool] of Object.entries(STATUS_TO_TOOL)) {
     if (status.startsWith(prefix)) return tool;
   }

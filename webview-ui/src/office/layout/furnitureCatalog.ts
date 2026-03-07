@@ -150,7 +150,8 @@ let dynamicCategories: FurnitureCategory[] | null = null;
 /**
  * Build catalog from loaded assets. Returns true if successful.
  * Once built, all getCatalog* functions use the dynamic catalog.
- * Uses ONLY custom assets (excludes hardcoded furniture when assets are loaded).
+ * Custom assets are layered on top of the built-in fallback furniture so
+ * importing a tileset does not remove the functional default desks/chairs.
  */
 export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
   if (!assets?.catalog || !assets?.sprites) return false;
@@ -180,6 +181,10 @@ export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
     .filter((e): e is CatalogEntryWithCategory => e !== null);
 
   if (allEntries.length === 0) return false;
+
+  const fallbackEntries = FURNITURE_CATALOG.filter(
+    (entry) => !allEntries.some((asset) => asset.type === entry.type),
+  );
 
   // Build rotation groups from groupId + orientation metadata
   rotationGroups.clear();
@@ -284,16 +289,16 @@ export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
     if (asset.state === 'on') onStateIds.add(asset.id);
   }
 
-  // Store full internal catalog (all variants — for getCatalogEntry lookups)
-  internalCatalog = allEntries;
+  // Store full internal catalog (all imported variants plus built-in fallback entries)
+  internalCatalog = [...allEntries, ...fallbackEntries];
 
   // Visible catalog: exclude non-front variants and "on" state variants
-  const visibleEntries = allEntries.filter(
+  const visibleImportedEntries = allEntries.filter(
     (e) => !nonFrontIds.has(e.type) && !onStateIds.has(e.type),
   );
 
   // Strip orientation/state suffix from labels for grouped variants
-  for (const entry of visibleEntries) {
+  for (const entry of visibleImportedEntries) {
     if (rotationGroups.has(entry.type) || stateGroups.has(entry.type)) {
       entry.label = entry.label
         .replace(/ - Front - Off$/, '')
@@ -302,14 +307,14 @@ export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
     }
   }
 
-  dynamicCatalog = visibleEntries;
-  dynamicCategories = Array.from(new Set(visibleEntries.map((e) => e.category)))
+  dynamicCatalog = [...visibleImportedEntries, ...fallbackEntries];
+  dynamicCategories = Array.from(new Set(dynamicCatalog.map((e) => e.category)))
     .filter((c): c is FurnitureCategory => !!c)
     .sort();
 
   const rotGroupCount = new Set(Array.from(rotationGroups.values())).size;
   console.log(
-    `✓ Built dynamic catalog with ${allEntries.length} assets (${visibleEntries.length} visible, ${rotGroupCount} rotation groups, ${stateGroups.size / 2} state pairs)`,
+    `✓ Built dynamic catalog with ${allEntries.length} imported assets (${dynamicCatalog.length} visible total, ${rotGroupCount} rotation groups, ${stateGroups.size / 2} state pairs)`,
   );
   return true;
 }

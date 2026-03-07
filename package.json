@@ -1,7 +1,7 @@
 {
   "name": "pixel-agents",
   "displayName": "Pixel Agents",
-  "description": "Pixel art office where your Claude Code agents come to life as animated characters",
+  "description": "Pixel art office where your Cursor agents come to life as animated characters",
   "version": "1.0.2",
   "publisher": "pablodelucca",
   "repository": {
@@ -11,7 +11,7 @@
   "icon": "icon.png",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.107.0"
+    "vscode": "^1.105.0"
   },
   "categories": [
     "Other"
@@ -23,6 +23,10 @@
       {
         "command": "pixel-agents.showPanel",
         "title": "Pixel Agents: Show Panel"
+      },
+      {
+        "command": "pixel-agents.openTab",
+        "title": "Pixel Agents: Open in Editor Tab"
       },
       {
         "command": "pixel-agents.exportDefaultLayout",
@@ -46,6 +50,26 @@
           "name": "Pixel Agents"
         }
       ]
+    },
+    "configuration": {
+      "title": "Pixel Agents",
+      "properties": {
+        "pixel-agents.cursorLaunchCommand": {
+          "type": "string",
+          "default": "agent",
+          "description": "Terminal command template for launching a Cursor agent. Optional: include {sessionId} if your CLI supports explicit resume/session IDs."
+        },
+        "pixel-agents.cursorTranscriptsRootDir": {
+          "type": "string",
+          "default": ".cursor/projects",
+          "description": "Path under your home directory where Cursor project transcript folders are stored."
+        },
+        "pixel-agents.cursorTranscriptsSubdir": {
+          "type": "string",
+          "default": "agent-transcripts",
+          "description": "Per-project subdirectory containing transcript files."
+        }
+      }
     }
   },
   "scripts": {
@@ -63,15 +87,14 @@
     "lint:fix": "eslint src --fix",
     "lint:webview": "cd webview-ui && npm run lint",
     "lint:webview:fix": "cd webview-ui && eslint . --fix",
-    "import-tileset": "tsx scripts/import-tileset-cli.ts",
+    "import-office-assets": "tsx scripts/import-office-assets.ts",
     "format": "prettier --write \"src/**/*.ts\" \"webview-ui/src/**/*.{ts,tsx,css}\" \"*.{js,mjs}\" \"webview-ui/*.{js,ts}\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"webview-ui/src/**/*.{ts,tsx,css}\" \"*.{js,mjs}\" \"webview-ui/*.{js,ts}\""
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.74.0",
     "@types/node": "22.x",
     "@types/pngjs": "^6.0.5",
-    "@types/vscode": "^1.107.0",
+    "@types/vscode": "^1.105.0",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",

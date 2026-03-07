@@ -15,7 +15,16 @@ import type { Character, Seat, SpriteData, TileType as TileTypeVal } from '../ty
 import { CharacterState, Direction, TILE_SIZE } from '../types.js';
 
 /** Tools that show reading animation instead of typing */
-const READING_TOOLS = new Set(['Read', 'Grep', 'Glob', 'WebFetch', 'WebSearch']);
+const READING_TOOLS = new Set([
+  'Read',
+  'ReadFile',
+  'Grep',
+  'rg',
+  'Glob',
+  'WebFetch',
+  'WebSearch',
+  'SemanticSearch',
+]);
 
 export function isReadingTool(tool: string | null): boolean {
   if (!tool) return false;
@@ -73,7 +82,7 @@ export function createCharacter(
     wanderTimer: 0,
     wanderCount: 0,
     wanderLimit: randomInt(WANDER_MOVES_BEFORE_REST_MIN, WANDER_MOVES_BEFORE_REST_MAX),
-    isActive: true,
+    isActive: false,
     seatId,
     bubbleType: null,
     bubbleTimer: 0,

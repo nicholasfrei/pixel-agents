@@ -188,18 +188,19 @@ export function useExtensionMessages(
         const id = msg.id as number;
         const toolId = msg.toolId as string;
         const status = msg.status as string;
+        const toolName = (msg.toolName as string | undefined) || null;
+        const toolClass = msg.toolClass as ToolActivity['toolClass'];
         setAgentTools((prev) => {
           const list = prev[id] || [];
           if (list.some((t) => t.toolId === toolId)) return prev;
-          return { ...prev, [id]: [...list, { toolId, status, done: false }] };
+          return { ...prev, [id]: [...list, { toolId, toolName, toolClass, status, done: false }] };
         });
-        const toolName = extractToolName(status);
-        os.setAgentTool(id, toolName);
+        os.setAgentTool(id, extractToolName(status, toolName));
         os.setAgentActive(id, true);
         os.clearPermissionBubble(id);
-        // Create sub-agent character for Task tool subtasks
-        if (status.startsWith('Subtask:')) {
-          const label = status.slice('Subtask:'.length).trim();
+        // Create sub-agent character from structured root task metadata
+        if (msg.isSubagentRoot) {
+          const label = ((msg.subagentLabel as string | undefined) || 'Subtask').trim();
           const subId = os.addSubagent(id, toolId);
           setSubagentCharacters((prev) => {
             if (prev.some((s) => s.id === subId)) return prev;
@@ -243,7 +244,7 @@ export function useExtensionMessages(
         const id = msg.id as number;
         const status = msg.status as string;
         setAgentStatuses((prev) => {
-          if (status === 'active') {
+          if (status === 'active' || status === 'idle') {
             if (!(id in prev)) return prev;
             const next = { ...prev };
             delete next[id];
@@ -251,10 +252,13 @@ export function useExtensionMessages(
           }
           return { ...prev, [id]: status };
         });
-        os.setAgentActive(id, status === 'active');
+        // active and thinking = agent is working; waiting = done, show bubble + sound; idle = clear bubble
+        os.setAgentActive(id, status === 'active' || status === 'thinking');
         if (status === 'waiting') {
           os.showWaitingBubble(id);
           playDoneSound();
+        } else if (status === 'idle') {
+          os.clearWaitingBubble(id);
         }
       } else if (msg.type === 'agentToolPermission') {
         const id = msg.id as number;
@@ -299,20 +303,24 @@ export function useExtensionMessages(
         const parentToolId = msg.parentToolId as string;
         const toolId = msg.toolId as string;
         const status = msg.status as string;
+        const toolName = (msg.toolName as string | undefined) || null;
+        const toolClass = msg.toolClass as ToolActivity['toolClass'];
         setSubagentTools((prev) => {
           const agentSubs = prev[id] || {};
           const list = agentSubs[parentToolId] || [];
           if (list.some((t) => t.toolId === toolId)) return prev;
           return {
             ...prev,
-            [id]: { ...agentSubs, [parentToolId]: [...list, { toolId, status, done: false }] },
+            [id]: {
+              ...agentSubs,
+              [parentToolId]: [...list, { toolId, toolName, toolClass, status, done: false }],
+            },
           };
         });
         // Update sub-agent character's tool and active state
         const subId = os.getSubagentId(id, parentToolId);
         if (subId !== null) {
-          const subToolName = extractToolName(status);
-          os.setAgentTool(subId, subToolName);
+          os.setAgentTool(subId, extractToolName(status, toolName));
           os.setAgentActive(subId, true);
         }
       } else if (msg.type === 'subagentToolDone') {

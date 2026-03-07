@@ -76,6 +76,8 @@ export interface FurnitureInstance {
 
 export interface ToolActivity {
   toolId: string;
+  toolName: string | null;
+  toolClass?: 'read' | 'write' | 'run' | 'search' | 'ask' | 'task' | 'plan' | 'other';
   status: string;
   done: boolean;
   permissionWait?: boolean;
