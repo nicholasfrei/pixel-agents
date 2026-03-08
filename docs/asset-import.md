@@ -2,6 +2,8 @@
 
 How to get furniture assets into the Pixel Agents extension.
 
+**Quick option:** Pre-built [GitHub Releases](https://github.com/nicholasfrei/pixel-agents/releases) include a `.vsix` with the full furniture catalog—no import needed if you install from the Releases page.
+
 ---
 
 ## Recommended: Pull from the published extension (most efficient)

@@ -4,7 +4,7 @@ A VS Code extension that turns your AI coding agents into animated pixel art cha
 
 Each Cursor agent terminal you open spawns a character that walks around, sits at desks, and visually reflects what the agent is doing — typing when writing code, reading when searching files, waiting when it needs your attention.
 
-This is the source code for the free [Pixel Agents extension for VS Code](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents) — you can install it directly from the marketplace with the full furniture catalog included.
+This is the source code for the free [Pixel Agents extension for VS Code](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents). Install from the marketplace (full furniture catalog included), or download the `.vsix` from [GitHub Releases](https://github.com/nicholasfrei/pixel-agents/releases) and use **Extensions: Install from VSIX...**.
 
 
 ![Pixel Agents screenshot](webview-ui/public/Screenshot.jpg)
@@ -26,7 +26,7 @@ This is the source code for the free [Pixel Agents extension for VS Code](https:
 
 ## Requirements
 
-- VS Code 1.109.0 or later
+- VS Code 1.105.0 or later (or Cursor)
 - Cursor with agent/terminal workflow available
 
 ## Getting Started
@@ -69,12 +69,7 @@ The grid is expandable up to 64×64 tiles. Click the ghost border outside the cu
 
 The office tileset used in this project and available via the extension is **[Office Interior Tileset (16x16)](https://donarg.itch.io/officetileset)** by **Donarg**, available on itch.io for **$2 USD**.
 
-This is the only part of the project that is not freely available. The tileset is not included in this repository due to its license. To use Pixel Agents locally with the full set of office furniture and decorations, purchase the tileset and import it directly:
-
-```bash
-npm run import-office-assets -- "~/Downloads/Office Tileset"
-npm run build
-```
+This is the only part of the project that is not freely available. The tileset is not included in this repository due to its license. To use Pixel Agents locally with the full set of office furniture and decorations, purchase the tileset and import it directly. 
 
 The importer reads `Office Tileset All 16x16 no shadow.png`, auto-detects the furniture sprites, writes them to `assets/furniture/`, and bundles them into `dist/assets/` on build. Imported assets currently land in the `Misc` category by default, while the built-in desks and chairs remain available as fallbacks.
 
@@ -94,6 +89,13 @@ The webview runs a lightweight game loop with canvas rendering, BFS pathfinding,
 
 - **TODO: Fix the "Active" status for Cursor CLI** — In practice, Cursor CLI transcripts often do not include top-level tool-use records; only text/thinking and sometimes progress. The extension infers activity from assistant text, thinking blocks, progress records, and partial-line streaming, but the "Active" stage (with tool-specific labels) may not appear. Improving this requires either better signals from Cursor or alternative detection (e.g. terminal output or agent-tools directory).
 
+## Documentation
+
+- [CHANGELOG.md](CHANGELOG.md) — release history
+- [docs/furniture-import.md](docs/furniture-import.md) — getting furniture assets (pull from marketplace, or import from tileset)
+- [docs/asset-reload.md](docs/asset-reload.md) — reloading furniture if the UI shows blank
+- [docs/cursor-runtime.md](docs/cursor-runtime.md) — Cursor transcript paths and launch settings
+
 ## Tech Stack
 
 - **Extension**: TypeScript, VS Code Webview API, esbuild
@@ -104,7 +106,7 @@ The webview runs a lightweight game loop with canvas rendering, BFS pathfinding,
 - **Agent-terminal sync** — the way agents are connected to Cursor terminal instances is not super robust and sometimes desyncs, especially when terminals are rapidly opened/closed or restored across sessions.
 - **Cursor CLI status ("Active" stage)** — Cursor CLI transcript format does not expose top-level tool-use in the JSONL; the extension uses assistant text, thinking blocks, progress records, and partial-line streaming to show "Thinking…" and "Waiting for input", but the **Active** stage (with tool labels like "Reading file", "Running command") often does not appear. See TODO above.
 - **Heuristic-based status detection** — Turn boundaries rely on explicit turn-end records when present and a 30-second idle timer when the transcript goes silent; after 15 minutes in "Waiting for input" the character returns to idle. Brief state misfires are still possible.
-- **Windows-only testing** — the extension has only been tested on Windows 11. It may work on macOS or Linux, but there could be unexpected issues with file watching, paths, or terminal behavior on those platforms.
+- **Platform testing** — the extension has been tested on Windows 11 and macOS. Linux may work but is less tested; there could be differences in file watching, paths, or terminal behavior.
 
 ## Roadmap
 
