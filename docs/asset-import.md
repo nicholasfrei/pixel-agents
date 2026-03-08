@@ -30,51 +30,13 @@ The script downloads the current marketplace `.vsix`, extracts it, and copies `e
 
 If you have the [Office Tileset](https://donarg.itch.io/officetileset) PNG (or a similar tileset) and want to import from source instead of pulling from the marketplace:
 
-**On this branch (main):** The repo has both the **original 6-stage pipeline** (scripts 0–5 and `scripts/.tileset-working/`) restored from commit e7a95c6 and the **single-script** flow (`scripts/import-office-assets.ts`). Furniture is loaded from `dist/assets/furniture/` after `npm run build` (build copies repo `assets/` and webview public assets into `dist/assets/`).
+**On this branch (main):** The repo has the **original 6-stage pipeline** (scripts 0–5 and `scripts/.tileset-working/`). Furniture is loaded from `dist/assets/furniture/` after `npm run build` (build copies repo `assets/` and webview public assets into `dist/assets/`).
 
 ---
 
-## Current branch (main): single-script import
+## Current branch (main): single-script import (optional)
 
-This is the flow that matches the import script and assets on this branch (refactored fork). It uses one script and writes to repo-root `assets/furniture/`.
-
-### Source file
-
-- **Tileset**: `Office Tileset All 16x16 no shadow.png`
-- **Example location**: `~/Downloads/Office Tileset/Office Tileset All 16x16 no shadow.png`
-
-The script looks in that folder by default, or you can pass the PNG path explicitly.
-
-### Steps
-
-1. **Run the import** (from repo root):
-   ```bash
-   npm run import-office-assets
-   ```
-   Or with an explicit path:
-   ```bash
-   npm run import-office-assets -- "/Users/nicholas/Downloads/Office Tileset/Office Tileset All 16x16 no shadow.png"
-   ```
-   - Reads the PNG, detects assets with flood-fill, writes `assets/furniture/misc/office_import_001.png` … `office_import_*.png` and `assets/furniture/furniture-catalog.json`.
-
-2. **Build the extension**
-   ```bash
-   npm run build
-   ```
-   Copies `assets/` (and webview public assets) to `dist/assets/`.
-
-3. **Reload the extension**  
-   Reload the Extension Development Host. Open the Pixel Agents panel and the layout editor; imported furniture appears in the **Misc** tab.
-
-### Paths (current branch)
-
-| What | Path |
-|------|------|
-| Source PNG | Your file (e.g. `~/Downloads/Office Tileset/Office Tileset All 16x16 no shadow.png`) |
-| Script | `scripts/import-office-assets.ts` |
-| Output PNGs | `assets/furniture/misc/office_import_*.png` |
-| Catalog | `assets/furniture/furniture-catalog.json` |
-| At runtime | Extension loads from `dist/assets/furniture/` (after `npm run build`) |
+**Note:** The script `scripts/import-office-assets.ts` and the `npm run import-office-assets` command are not present in this repo. Use **Pull from the published extension** (above) or the **Original 6-stage pipeline** (below) to get furniture. If you have a copy of `import-office-assets.ts` from another branch, it would write to repo-root `assets/furniture/`; then `npm run build` copies `assets/` and webview public assets to `dist/assets/`.
 
 ---
 

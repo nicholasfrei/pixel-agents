@@ -92,8 +92,7 @@ The webview runs a lightweight game loop with canvas rendering, BFS pathfinding,
 ## Documentation
 
 - [CHANGELOG.md](CHANGELOG.md) — release history
-- [docs/furniture-import.md](docs/furniture-import.md) — getting furniture assets (pull from marketplace, or import from tileset)
-- [docs/asset-reload.md](docs/asset-reload.md) — reloading furniture if the UI shows blank
+- [docs/asset-import.md](docs/asset-import.md) — getting furniture assets (pull from marketplace or 6-stage pipeline); reload the extension if the UI shows blank
 - [docs/cursor-runtime.md](docs/cursor-runtime.md) — Cursor transcript paths and launch settings
 
 ## Tech Stack
