@@ -1,0 +1,29 @@
+---
+description: How to package and test the Pixel Agents extension in Cursor (vsce package, install, reload)
+alwaysApply: true
+---
+
+# Extension packaging and testing (Cursor)
+
+## Preferred workflow
+
+The maintainer **does not** use `npm run build` for day-to-day testing. Instead:
+
+1. **Package the extension** (from repo root):
+   ```bash
+   npx @vscode/vsce@2.26.0 package
+   ```
+   This runs the build steps and produces a `.vsix` file.
+
+2. **Install into Cursor**: Install the generated `.vsix` (e.g. from Command Palette → "Extensions: Install from VSIX..." or by opening the `.vsix`).
+
+3. **Reload**: Reload the extension / Cursor window to pick up changes.
+
+## Agent instructions
+
+When making changes that affect the extension and the user needs to try them:
+
+- Run: `npx @vscode/vsce@2.26.0 package`
+- Then tell the user: **Reload the extension** (or reload Cursor) to test.
+
+Do **not** assume `npm run build` is required every time for the user to test; packaging with vsce is the standard flow here.
