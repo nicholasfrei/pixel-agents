@@ -37,8 +37,9 @@ You can use Pixel Agents in two ways:
 
 The easiest way to use Pixel Agents is to install it so it stays installed across restarts and machines:
 
-- **From the marketplace:** [Install the VS Code extension](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents) (full furniture catalog included).
-- **From a `.vsix` file:** Download the latest `.vsix` from [GitHub Releases](https://github.com/nicholasfrei/pixel-agents/releases), then use **Extensions: Install from VSIX...** from the Command Palette. The extension will persist until you uninstall or update it.
+- **For Claude Code (VS Code) users:** [Install the VS Code extension from the marketplace](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents) (full furniture catalog included). *Note: This version does **not** support Cursor.*
+- **For Cursor users:** Download the latest `.vsix` file from [GitHub Releases](https://github.com/nicholasfrei/pixel-agents/releases), then use **Extensions: Install from VSIX...** from the Command Palette. *This release is built specifically for Cursor and does not support Claude Code. The extension will persist until you uninstall or update it.*
+
 
 ### Option 2: Run from source (for development)
 
