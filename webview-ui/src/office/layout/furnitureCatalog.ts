@@ -319,13 +319,26 @@ export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
   return true;
 }
 
-export function getCatalogEntry(type: string): CatalogEntryWithCategory | undefined {
-  // Check internal catalog first (includes all variants, e.g., non-front rotations)
-  if (internalCatalog) {
-    return internalCatalog.find((e) => e.type === type);
+/** Legacy layout types: ASSET_NEW_110, ASSET_27_A → resolve to ASSET_110, ASSET_27 for catalog lookup */
+function resolveFurnitureType(type: string, catalog: CatalogEntryWithCategory[]): string {
+  if (catalog.some((e) => e.type === type)) return type;
+  const newMatch = /^ASSET_NEW_(\d+)$/.exec(type);
+  if (newMatch) {
+    const resolved = `ASSET_${newMatch[1]}`;
+    if (catalog.some((e) => e.type === resolved)) return resolved;
   }
-  const catalog = dynamicCatalog || FURNITURE_CATALOG;
-  return catalog.find((e) => e.type === type);
+  const suffixMatch = /^ASSET_(\d+)_/.exec(type);
+  if (suffixMatch) {
+    const resolved = `ASSET_${suffixMatch[1]}`;
+    if (catalog.some((e) => e.type === resolved)) return resolved;
+  }
+  return type;
+}
+
+export function getCatalogEntry(type: string): CatalogEntryWithCategory | undefined {
+  const catalog = internalCatalog ?? dynamicCatalog ?? FURNITURE_CATALOG;
+  const resolved = resolveFurnitureType(type, catalog);
+  return catalog.find((e) => e.type === resolved);
 }
 
 export function getCatalogByCategory(category: FurnitureCategory): CatalogEntryWithCategory[] {

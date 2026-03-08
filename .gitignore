@@ -3,8 +3,9 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+temp-pixel-agents-marketplace.vsix
+temp-vsix-extract
 .claude/
-.cursor/
 /logs
 /sprites-export
 .env
