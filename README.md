@@ -94,7 +94,7 @@ Pixel Agents watches Cursor transcript files (`~/.cursor/projects/<project-hash>
 
 - **Thinking…** — transcript file is being written but no complete JSONL line yet (streaming).
 - **Active** — complete transcript lines (assistant text, tool use, or progress) have been parsed; character shows tool activity when available.
-- **Waiting for input** — no new transcript data for 30 seconds, or Cursor sent a turn-end signal; character shows a green checkmark bubble and an optional sound. After 15 minutes in this state, the character returns to **idle** (bubble clears, no "Waiting for input" label).
+- **Waiting for input** — no new transcript data for 30 seconds, or Cursor sent a turn-end signal; character shows a green checkmark bubble and an optional sound. After ~8 hours in this state, the character returns to **idle** (bubble clears, no "Waiting for input" label).
 
 The webview runs a lightweight game loop with canvas rendering, BFS pathfinding, and a character state machine (idle → walk → type/read). Everything is pixel-perfect at integer zoom levels.
 
@@ -115,7 +115,7 @@ The webview runs a lightweight game loop with canvas rendering, BFS pathfinding,
 
 - **Agent-terminal sync** — the way agents are connected to Cursor terminal instances is not super robust and sometimes desyncs, especially when terminals are rapidly opened/closed or restored across sessions.
 - **Cursor CLI status ("Active" stage)** — Cursor CLI transcript format does not expose top-level tool-use in the JSONL; the extension uses assistant text, thinking blocks, progress records, and partial-line streaming to show "Thinking…" and "Waiting for input", but the **Active** stage (with tool labels like "Reading file", "Running command") often does not appear. See TODO above.
-- **Heuristic-based status detection** — Turn boundaries rely on explicit turn-end records when present and a 30-second idle timer when the transcript goes silent; after 15 minutes in "Waiting for input" the character returns to idle. Brief state misfires are still possible.
+- **Heuristic-based status detection** — Turn boundaries rely on explicit turn-end records when present and a 30-second idle timer when the transcript goes silent; after ~8 hours in "Waiting for input" the character returns to idle. Brief state misfires are still possible.
 - **Platform testing** — the extension has been tested on Windows 11 and macOS. Linux may work but is less tested; there could be differences in file watching, paths, or terminal behavior.
 - **Sidepanel/Composer chats** — only agent terminals (launched via **+ Agent** or the Cursor CLI) get characters. Chats you open in the Cursor sidepanel (Composer, Chat) write to the same `agent-transcripts/` folder but are not wired up: the extension only attaches transcripts to terminals or to pending agents created by **+ Agent**, so sidepanel chats do not get their own characters.
 

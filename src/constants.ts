@@ -12,8 +12,8 @@ export const PERMISSION_TIMER_DELAY_MS = 7000;
 // a longer delay to avoid false 'waiting' during tool execution.
 /** Delay (ms) before showing "Waiting for input" after transcript goes silent. 30 seconds. */
 export const TEXT_IDLE_DELAY_MS = 30000;
-/** After this long in "Waiting for input" state, character returns to idle (no bubble). 15 minutes. */
-export const WAITING_TO_IDLE_DELAY_MS = 15 * 60 * 1000;
+/** After this long in "Waiting for input" state, character returns to idle (no bubble). ~8 hours. */
+export const WAITING_TO_IDLE_DELAY_MS = 8 * 60 * 60 * 1000;
 // Secondary activity signal: new files in agent-tools/ mean tools are running.
 // This extends the idle timer by another TEXT_IDLE_DELAY_MS when fired.
 export const CURSOR_AGENT_TOOLS_SUBDIR = 'agent-tools';

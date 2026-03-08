@@ -620,7 +620,7 @@ export class OfficeState {
     }
   }
 
-  /** Clear waiting bubble (e.g. after 15 min in waiting → idle). */
+  /** Clear waiting bubble (e.g. after ~8 hours in waiting → idle). */
   clearWaitingBubble(id: number): void {
     const ch = this.characters.get(id);
     if (ch && ch.bubbleType === 'waiting') {

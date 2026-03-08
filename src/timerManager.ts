@@ -84,7 +84,7 @@ export function startWaitingTimer(
       id: agentId,
       status: 'waiting',
     });
-    // After 15 minutes in "waiting for input", return character to idle (clear bubble)
+    // After ~8 hours in "waiting for input", return character to idle (clear bubble)
     if (waitingToIdleTimers) {
       const idleTimer = setTimeout(() => {
         waitingToIdleTimers.delete(agentId);
