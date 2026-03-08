@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import {
+  COMMAND_CLOSE_PANEL,
   COMMAND_EXPORT_DEFAULT_LAYOUT,
   COMMAND_OPEN_TAB,
   COMMAND_SHOW_PANEL,
@@ -19,6 +20,17 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMAND_SHOW_PANEL, () => {
       vscode.commands.executeCommand(`${VIEW_ID}.focus`);
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(COMMAND_CLOSE_PANEL, async () => {
+      // Try to close only the Pixel Agents view; fallback closes the whole panel.
+      try {
+        await vscode.commands.executeCommand('workbench.action.closeView', VIEW_ID);
+      } catch {
+        await vscode.commands.executeCommand('workbench.action.closePanel');
+      }
     }),
   );
 

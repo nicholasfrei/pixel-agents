@@ -48,6 +48,7 @@ export const GLOBAL_KEY_SOUND_ENABLED = 'pixel-agents.soundEnabled';
 // ── VS Code Identifiers ─────────────────────────────────────
 export const VIEW_ID = 'pixel-agents.panelView';
 export const COMMAND_SHOW_PANEL = 'pixel-agents.showPanel';
+export const COMMAND_CLOSE_PANEL = 'pixel-agents.closePanel';
 export const COMMAND_OPEN_TAB = 'pixel-agents.openTab';
 export const COMMAND_EXPORT_DEFAULT_LAYOUT = 'pixel-agents.exportDefaultLayout';
 export const WORKSPACE_KEY_AGENTS = 'pixel-agents.agents';

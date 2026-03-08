@@ -48,10 +48,11 @@ Then press **F5** in VS Code to launch the Extension Development Host.
 ### Usage
 
 1. Open the **Pixel Agents** panel (it appears in the bottom panel area alongside your terminal)
-2. Click **+ Agent** to spawn a new Cursor agent terminal and its character
-3. Start coding with Cursor Agent mode — watch the character react in real time
-4. Click a character to select it, then click a seat to reassign it
-5. Click **Layout** to open the office editor and customize your space
+2. To close the panel: run **Pixel Agents: Close Panel** from the Command Palette (Ctrl+Shift+P / Cmd+Shift+P), or right‑click the **Pixel Agents** tab in the panel and choose **Close** if your editor shows it
+3. Click **+ Agent** to spawn a new Cursor agent terminal and its character
+4. Start coding with Cursor Agent mode — watch the character react in real time
+5. Click a character to select it, then click a seat to reassign it
+6. Click **Layout** to open the office editor and customize your space
 
 ## Layout Editor
 
@@ -106,11 +107,13 @@ The webview runs a lightweight game loop with canvas rendering, BFS pathfinding,
 - **Cursor CLI status ("Active" stage)** — Cursor CLI transcript format does not expose top-level tool-use in the JSONL; the extension uses assistant text, thinking blocks, progress records, and partial-line streaming to show "Thinking…" and "Waiting for input", but the **Active** stage (with tool labels like "Reading file", "Running command") often does not appear. See TODO above.
 - **Heuristic-based status detection** — Turn boundaries rely on explicit turn-end records when present and a 30-second idle timer when the transcript goes silent; after 15 minutes in "Waiting for input" the character returns to idle. Brief state misfires are still possible.
 - **Platform testing** — the extension has been tested on Windows 11 and macOS. Linux may work but is less tested; there could be differences in file watching, paths, or terminal behavior.
+- **Sidepanel/Composer chats** — only agent terminals (launched via **+ Agent** or the Cursor CLI) get characters. Chats you open in the Cursor sidepanel (Composer, Chat) write to the same `agent-transcripts/` folder but are not wired up: the extension only attaches transcripts to terminals or to pending agents created by **+ Agent**, so sidepanel chats do not get their own characters.
 
 ## Roadmap
 
 There are several areas where contributions would be very welcome:
 
+- **Sidepanel/Composer chat support** — show characters for Cursor sidepanel chats as well as agent terminals. Transcripts are already in the same format and folder; the work is to create “orphan” agents (no terminal) when a new transcript appears without a matching terminal, and to handle focus/close in the UI (e.g. open Composer when clicking a sidepanel character; “close” removes the character since there is no Cursor API to close a specific chat).
 - **Improve agent-terminal reliability** — more robust connection and sync between characters and Cursor agent terminals
 - **Better status detection** — find or propose clearer signals for agent state transitions (waiting, done, permission needed). **Cursor CLI:** fix "Active" status so tool-specific activity is shown when the agent is replying or using tools (see TODO in How It Works).
 - **Community assets** — freely usable pixel art tilesets or characters that anyone can use without purchasing third-party assets
