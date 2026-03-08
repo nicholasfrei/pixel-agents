@@ -1,0 +1,43 @@
+---
+description: How to publish a GitHub release and attach the .vsix binary for Pixel Agents
+alwaysApply: true
+---
+
+# GitHub release and .vsix binary
+
+## Publishing a new release
+
+After bumping the version in `package.json` and running the package command, publish the release and attach the `.vsix` so users can install from GitHub:
+
+```bash
+gh release create v<VERSION> pixel-agents-<VERSION>.vsix --title "v<VERSION>" --notes "..."
+```
+
+Example for 1.0.4:
+
+```bash
+gh release create v1.0.4 pixel-agents-1.0.4.vsix --title "v1.0.4" --notes "Release 1.0.4 - Brief summary. Install: download the .vsix and use Extensions: Install from VSIX..."
+```
+
+## Notes
+
+- **Default repo (one-time):** If `gh` says "No default remote repository has been set", run from the repo root:
+  ```bash
+  gh repo set-default nicholasfrei/pixel-agents
+  ```
+  Then run the `gh release create` command again.
+- **Attaching the binary:** Any file path arguments after the tag are uploaded as release assets. So `pixel-agents-1.0.4.vsix` in the command is attached to the release; users see it under **Assets** on the release page.
+- **Where to run:** Run from the repo root so `pixel-agents-<VERSION>.vsix` exists in the current directory (it’s created by `npx @vscode/vsce@2.26.0 package`).
+- **First-time auth:** If `gh release create` fails with a scope error, run:
+  ```bash
+  gh auth refresh -h github.com -s workflow
+  ```
+  then run the `gh release create` command again.
+- **Release notes:** Replace `"..."` with a short summary and, if useful, install instructions (e.g. “Download the .vsix below and use **Extensions: Install from VSIX...** in VS Code or Cursor.”).
+
+## Full flow (version bump → release)
+
+1. Bump `version` in `package.json` (e.g. `1.0.4`).
+2. From repo root: `npx @vscode/vsce@2.26.0 package` → produces `pixel-agents-1.0.4.vsix`.
+3. Commit and push the version bump (and any other changes).
+4. Run the `gh release create` command above with the same version and your notes.
