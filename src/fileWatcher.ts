@@ -119,10 +119,10 @@ export function readNewLines(
       );
     }
 
-    // Only start the "waiting for input" timer when we have complete lines (turn segment done).
-    // When we only have a partial line (thinking), we don't start the timer — prevents
-    // status flipping to "Waiting for input" while the agent is still streaming.
-    if (hasLines) {
+    // Only start the "waiting for input" timer when we have complete lines and no partial line.
+    // If we still have a partial line in the buffer, the agent is still streaming — don't start
+    // the timer or we can briefly show "Waiting for input" when the next chunk is slow to arrive.
+    if (hasLines && !hasPartialLine) {
       startWaitingTimer(
         agentId,
         TEXT_IDLE_DELAY_MS,
