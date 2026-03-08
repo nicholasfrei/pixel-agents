@@ -245,7 +245,6 @@ export function useExtensionMessages(
         const status = msg.status as string;
         setAgentStatuses((prev) => {
           if (status === 'active' || status === 'idle') {
-            if (!(id in prev)) return prev;
             const next = { ...prev };
             delete next[id];
             return next;

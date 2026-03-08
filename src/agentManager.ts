@@ -556,12 +556,24 @@ export function sendCurrentAgentStatuses(
         status,
       });
     }
-    // Re-send waiting status
+    // Re-send status so UI matches extension state (fixes stale idle after panel refresh)
     if (agent.isWaiting) {
       webview.postMessage({
         type: 'agentStatus',
         id: agentId,
         status: 'waiting',
+      });
+    } else if (agent.activeToolStatuses.size > 0) {
+      webview.postMessage({
+        type: 'agentStatus',
+        id: agentId,
+        status: 'active',
+      });
+    } else {
+      webview.postMessage({
+        type: 'agentStatus',
+        id: agentId,
+        status: 'idle',
       });
     }
   }

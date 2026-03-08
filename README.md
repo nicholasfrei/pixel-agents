@@ -31,9 +31,18 @@ This is the source code for the free [Pixel Agents extension for VS Code](https:
 
 ## Getting Started
 
-If you just want to use Pixel Agents, the easiest way is to download the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents). If you want to play with the code, develop, or contribute, then:
+You can use Pixel Agents in two ways:
 
-### Install from source
+### Option 1: Install the extension (recommended for daily use)
+
+The easiest way to use Pixel Agents is to install it so it stays installed across restarts and machines:
+
+- **From the marketplace:** [Install the VS Code extension](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents) (full furniture catalog included).
+- **From a `.vsix` file:** Download the latest `.vsix` from [GitHub Releases](https://github.com/nicholasfrei/pixel-agents/releases), then use **Extensions: Install from VSIX...** from the Command Palette. The extension will persist until you uninstall or update it.
+
+### Option 2: Run from source (for development)
+
+To work on the code or contribute:
 
 ```bash
 git clone https://github.com/pablodelucca/pixel-agents.git
@@ -43,7 +52,7 @@ cd webview-ui && npm install && cd ..
 npm run build
 ```
 
-Then press **F5** in VS Code to launch the Extension Development Host.
+Then press **F5** in VS Code (or Cursor) to launch the Extension Development Host. The extension runs in a separate window; your changes require a full build and reload to appear. For quick iteration you can also run `npx @vscode/vsce@2.26.0 package` and install the generated `.vsix` to test in your main editor.
 
 ### Usage
 
