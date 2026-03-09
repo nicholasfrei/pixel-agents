@@ -142,7 +142,7 @@ export function ensureProjectScan(
   knownTranscriptFiles: Set<string>,
   transcriptFileMtimes: Map<string, number>,
   transcriptPollTimers: Map<number, ReturnType<typeof setInterval>>,
-  projectScanTimerRef: { current: ReturnType<typeof setInterval> | null },
+  projectScanTimers: Map<string, ReturnType<typeof setInterval>>,
   activeAgentIdRef: { current: number | null },
   nextAgentIdRef: { current: number },
   agents: Map<number, AgentState>,
@@ -154,7 +154,7 @@ export function ensureProjectScan(
   persistAgents: () => void,
   waitingToIdleTimers?: Map<number, ReturnType<typeof setTimeout>>,
 ): void {
-  if (projectScanTimerRef.current) return;
+  if (projectScanTimers.has(projectDir)) return;
   // Seed with all existing JSONL files so we only react to truly new ones
   try {
     const files = listTranscriptFiles(projectDir);
@@ -170,7 +170,7 @@ export function ensureProjectScan(
     /* dir may not exist yet */
   }
 
-  projectScanTimerRef.current = setInterval(() => {
+  const timer = setInterval(() => {
     scanForNewTranscriptFiles(
       projectDir,
       knownTranscriptFiles,
@@ -188,6 +188,8 @@ export function ensureProjectScan(
       waitingToIdleTimers,
     );
   }, PROJECT_SCAN_INTERVAL_MS);
+
+  projectScanTimers.set(projectDir, timer);
 }
 
 function scanForNewTranscriptFiles(
@@ -401,7 +403,10 @@ function tryAttachTranscriptFile(
     return true;
   }
 
-  if (activeAgentIdRef.current !== null && agents.has(activeAgentIdRef.current)) {
+  const activeAgent =
+    activeAgentIdRef.current !== null ? agents.get(activeAgentIdRef.current) : undefined;
+
+  if (activeAgent && activeAgent.projectDir === projectDir) {
     console.log(
       `[Pixel Agents] New JSONL detected: ${path.basename(transcriptFile)}, reassigning to agent ${activeAgentIdRef.current}`,
     );
@@ -577,8 +582,9 @@ export function watchAgentToolsDir(
     if (!hasNew) return;
 
     const webview = getWebview();
-    // A new tool file appeared — restart idle timer for all currently-active agents
+    // A new tool file appeared — restart idle timer for agents in this project only.
     for (const [agentId, agent] of agents) {
+      if (agent.projectDir !== projectDir) continue;
       if (!agent.isWaiting) {
         startWaitingTimer(
           agentId,

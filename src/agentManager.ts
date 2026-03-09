@@ -118,7 +118,7 @@ export async function launchNewTerminal(
   waitingTimers: Map<number, ReturnType<typeof setTimeout>>,
   permissionTimers: Map<number, ReturnType<typeof setTimeout>>,
   transcriptPollTimers: Map<number, ReturnType<typeof setInterval>>,
-  projectScanTimerRef: { current: ReturnType<typeof setInterval> | null },
+  projectScanTimers: Map<string, ReturnType<typeof setInterval>>,
   webview: vscode.Webview | undefined,
   persistAgents: () => void,
   folderPath?: string,
@@ -234,7 +234,7 @@ export async function launchNewTerminal(
     knownTranscriptFiles,
     transcriptFileMtimes,
     transcriptPollTimers,
-    projectScanTimerRef,
+    projectScanTimers,
     activeAgentIdRef,
     nextAgentIdRef,
     agents,
@@ -354,7 +354,7 @@ export function restoreAgents(
   waitingTimers: Map<number, ReturnType<typeof setTimeout>>,
   permissionTimers: Map<number, ReturnType<typeof setTimeout>>,
   transcriptPollTimers: Map<number, ReturnType<typeof setInterval>>,
-  projectScanTimerRef: { current: ReturnType<typeof setInterval> | null },
+  projectScanTimers: Map<string, ReturnType<typeof setInterval>>,
   activeAgentIdRef: { current: number | null },
   webview: vscode.Webview | undefined,
   doPersist: () => void,
@@ -366,7 +366,7 @@ export function restoreAgents(
   const liveTerminals = vscode.window.terminals;
   let maxId = 0;
   let maxIdx = 0;
-  let restoredProjectDir: string | null = null;
+  const restoredProjectDirs = new Set<string>();
 
   for (const p of persisted) {
     if (p.runtimeKind === 'stream-json') continue;
@@ -418,7 +418,7 @@ export function restoreAgents(
       if (idx > maxIdx) maxIdx = idx;
     }
 
-    restoredProjectDir = agent.projectDir;
+    restoredProjectDirs.add(agent.projectDir);
 
     // Start file watching if transcript exists, skipping to end of file
     try {
@@ -480,15 +480,21 @@ export function restoreAgents(
   // Re-persist cleaned-up list (removes entries whose terminals are gone)
   doPersist();
 
-  // Start project scan for /clear detection
-  const scanProjectDir = restoredProjectDir || getTranscriptProjectDirPath();
-  if (scanProjectDir) {
+  // Start project scans for /clear detection across all restored projects.
+  if (restoredProjectDirs.size === 0) {
+    const defaultProjectDir = getTranscriptProjectDirPath();
+    if (defaultProjectDir) {
+      restoredProjectDirs.add(defaultProjectDir);
+    }
+  }
+
+  for (const scanProjectDir of restoredProjectDirs) {
     ensureProjectScan(
       scanProjectDir,
       knownTranscriptFiles,
       transcriptFileMtimes,
       transcriptPollTimers,
-      projectScanTimerRef,
+      projectScanTimers,
       activeAgentIdRef,
       nextAgentIdRef,
       agents,

@@ -49,7 +49,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
   activeAgentId = { current: null as number | null };
   knownTranscriptFiles = new Set<string>();
   transcriptFileMtimes = new Map<string, number>();
-  projectScanTimer = { current: null as ReturnType<typeof setInterval> | null };
+  projectScanTimers = new Map<string, ReturnType<typeof setInterval>>();
 
   // Bundled default layout (loaded from assets/default-layout.json)
   defaultLayout: Record<string, unknown> | null = null;
@@ -58,7 +58,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
   layoutWatcher: LayoutWatcher | null = null;
 
   // agent-tools/ directory watcher (activity heartbeat for silent tool runs)
-  agentToolsWatcherDispose: (() => void) | null = null;
+  agentToolsWatcherDisposers = new Map<string, () => void>();
 
   constructor(private readonly context: vscode.ExtensionContext) {}
 
@@ -73,6 +73,67 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
   private persistAgents = (): void => {
     persistAgents(this.agents, this.context);
   };
+
+  private ensureProjectTracking(projectDir: string): void {
+    ensureProjectScan(
+      projectDir,
+      this.knownTranscriptFiles,
+      this.transcriptFileMtimes,
+      this.transcriptPollTimers,
+      this.projectScanTimers,
+      this.activeAgentId,
+      this.nextAgentId,
+      this.agents,
+      this.fileWatchers,
+      this.pollingTimers,
+      this.waitingTimers,
+      this.permissionTimers,
+      this.webview,
+      this.persistAgents,
+      this.waitingToIdleTimers,
+    );
+
+    if (!this.agentToolsWatcherDisposers.has(projectDir)) {
+      this.agentToolsWatcherDisposers.set(
+        projectDir,
+        watchAgentToolsDir(
+          projectDir,
+          this.agents,
+          this.waitingTimers,
+          () => this.webview,
+          this.waitingToIdleTimers,
+        ),
+      );
+    }
+  }
+
+  private ensureWorkspaceProjectTracking(): void {
+    const candidateProjectDirs = new Set<string>();
+
+    for (const folder of vscode.workspace.workspaceFolders || []) {
+      const projectDir = getTranscriptProjectDirPath(folder.uri.fsPath);
+      if (projectDir) {
+        candidateProjectDirs.add(projectDir);
+      }
+    }
+
+    for (const agent of this.agents.values()) {
+      if (agent.projectDir) {
+        candidateProjectDirs.add(agent.projectDir);
+      }
+    }
+
+    if (candidateProjectDirs.size === 0) {
+      const defaultProjectDir = getTranscriptProjectDirPath();
+      if (defaultProjectDir) {
+        candidateProjectDirs.add(defaultProjectDir);
+      }
+    }
+
+    for (const projectDir of candidateProjectDirs) {
+      this.ensureProjectTracking(projectDir);
+    }
+  }
 
   resolveWebviewView(webviewView: vscode.WebviewView) {
     this.webviewView = webviewView;
@@ -93,7 +154,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
           this.waitingTimers,
           this.permissionTimers,
           this.transcriptPollTimers,
-          this.projectScanTimer,
+          this.projectScanTimers,
           this.webview,
           this.persistAgents,
           message.folderPath as string | undefined,
@@ -131,7 +192,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
           this.waitingTimers,
           this.permissionTimers,
           this.transcriptPollTimers,
-          this.projectScanTimer,
+          this.projectScanTimers,
           this.activeAgentId,
           this.webview,
           this.persistAgents,
@@ -150,41 +211,13 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
           });
         }
 
-        // Ensure project scan runs even with no restored agents (to adopt external terminals)
-        const projectDir = getTranscriptProjectDirPath();
         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
         console.log('[Extension] workspaceRoot:', workspaceRoot);
+        this.ensureWorkspaceProjectTracking();
+
+        const projectDir = getTranscriptProjectDirPath();
         console.log('[Extension] projectDir:', projectDir);
         if (projectDir) {
-          ensureProjectScan(
-            projectDir,
-            this.knownTranscriptFiles,
-            this.transcriptFileMtimes,
-            this.transcriptPollTimers,
-            this.projectScanTimer,
-            this.activeAgentId,
-            this.nextAgentId,
-            this.agents,
-            this.fileWatchers,
-            this.pollingTimers,
-            this.waitingTimers,
-            this.permissionTimers,
-            this.webview,
-            this.persistAgents,
-            this.waitingToIdleTimers,
-          );
-
-          // Watch agent-tools/ to extend the idle timer during silent tool runs
-          if (!this.agentToolsWatcherDispose) {
-            this.agentToolsWatcherDispose = watchAgentToolsDir(
-              projectDir,
-              this.agents,
-              this.waitingTimers,
-              () => this.webview,
-              this.waitingToIdleTimers,
-            );
-          }
-
           // Load furniture assets BEFORE sending layout
           (async () => {
             try {
@@ -430,8 +463,10 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
     this.webviewPanel = undefined;
     this.layoutWatcher?.dispose();
     this.layoutWatcher = null;
-    this.agentToolsWatcherDispose?.();
-    this.agentToolsWatcherDispose = null;
+    for (const dispose of this.agentToolsWatcherDisposers.values()) {
+      dispose();
+    }
+    this.agentToolsWatcherDisposers.clear();
     for (const id of [...this.agents.keys()]) {
       removeAgent(
         id,
@@ -445,10 +480,10 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
         this.waitingToIdleTimers,
       );
     }
-    if (this.projectScanTimer.current) {
-      clearInterval(this.projectScanTimer.current);
-      this.projectScanTimer.current = null;
+    for (const timer of this.projectScanTimers.values()) {
+      clearInterval(timer);
     }
+    this.projectScanTimers.clear();
   }
 }
 
